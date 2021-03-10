@@ -1,0 +1,34 @@
+Bootstrap: docker
+From: ubuntu:18.04
+
+# Run when container is built
+%post
+	# Update library lists 
+	apt-get update
+
+	# Install programs used in compiling packages
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends make #required for magrittr
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gcc #required for magrittr
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libc6-dev #required for gcc to compile magrittr stuff
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends g++ #required to build, some of these might be replaceable with apt-get install build-essential
+	#DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential
+	#DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libblas-dev
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends liblapack-dev
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends liblapack3
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libopenblas-base
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libopenblas-dev
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gfortran
+
+	# To install a newer version of R than ubuntu 18.04's default (3.4.4)
+	## Install the packages necessary to add a new repository over HTTPS
+	DEBIAN_FRONTEND=noninteractive apt-get install -y apt-transport-https software-properties-common 
+
+	## Enable the CRAN repository and add the CRAN GPG key to your system
+	DEBIAN_FRONTEND=noninteractive apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+	DEBIAN_FRONTEND=noninteractive add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
+	
+	# Install R and packages
+	# Note: some of the above could potentially be avoided by installing r-base-dev, which includes tools necessary to compile R packages, instead of r-base-core
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends r-base-core
+	#R --slave -e 'install.packages(c("Matrix", "igraph","hbm", repos="http://cran.us.r-project.org"))'
+	R --slave -e 'install.packages(c("Matrix", "igraph","hbm"))'
